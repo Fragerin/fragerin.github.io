@@ -360,8 +360,47 @@ html {
     scroll-padding-top: 80px; /* Высота вашего хедера + 10px */
 }
 
+
 @media (max-width: 768px) {
-    html {
-        scroll-padding-top: 60px; /* Для мобильных */
+    .mechanics-swiper {
+        padding: 0 15px;
+        width: calc(100% + 30px);
+        margin-left: -15px;
+    }
+
+    .mechanics-swiper .swiper-wrapper {
+        padding: 0 15px;
+        box-sizing: border-box;
+    }
+
+    .mechanics-swiper .swiper-slide {
+        width: 100% !important;
+        margin-left: 0 !important;
+        transform: none !important;
+        opacity: 0.5;
+        transition: opacity 0.3s ease;
+    }
+
+    .mechanics-swiper .swiper-slide-active {
+        opacity: 1;
+        transform: scale(1.05);
+    }
+
+    .mechanic-card {
+        padding: 1.2rem;
     }
 }
+
+@media (max-width: 480px) {
+    .mechanics-swiper .swiper-slide {
+        width: 90% !important;
+        margin: 0 5% !important;
+    }
+    
+    .mechanics-swiper .swiper-slide-active {
+        transform: scale(1);
+    }
+}
+ html {
+        scroll-padding-top: 60px; /* Для мобильных */
+    }
