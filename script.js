@@ -29,8 +29,8 @@ document.addEventListener('DOMContentLoaded', () => {
         spaceBetween: 30,
         loop: true,
         breakpoints: {
-            768: { slidesPerView: 2, centeredSlides: false },
-            1200: { slidesPerView: 3, centeredSlides: false }
+            768: { slidesPerView: 2, centeredSlides: true },
+            1200: { slidesPerView: 3, centeredSlides: true }
         },
         pagination: { el: '.swiper-pagination', clickable: true },
         navigation: {
