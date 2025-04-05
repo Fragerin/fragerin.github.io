@@ -199,28 +199,52 @@ h2 {
 .sponsor-card {
     background: var(--beige);
     color: var(--dark-blue);
-    padding: 4rem;
+    padding: 3rem;
     border-radius: 30px;
-    text-align: center;
     max-width: 800px;
     margin: 0 auto;
     box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+    position: relative;
+    overflow: hidden;
+}
+
+.sponsor-card::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: url('img/scroll_texture.png') center/cover;
+    opacity: 0.1;
+    pointer-events: none;
 }
 
 .benefits-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
     margin: 3rem 0;
+    padding: 2rem;
+    background: rgba(255,255,255,0.85);
+    border-radius: 15px;
+    border: 2px solid var(--gold);
+    box-shadow: inset 0 0 20px rgba(0,0,0,0.1);
 }
 
 .benefit-item {
     display: flex;
     align-items: center;
-    gap: 1rem;
-    padding: 1.5rem;
-    background: rgba(255,255,255,0.9);
-    border-radius: 15px;
+    gap: 1.5rem;
+    padding: 1.2rem;
+    background: rgba(255,255,255,0.95);
+    border-radius: 10px;
+    transition: all 0.3s ease;
+}
+
+.benefit-item:hover {
+    transform: translateX(10px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
 }
 
 .subscribe-form {
