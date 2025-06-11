@@ -73,9 +73,9 @@ document.addEventListener('DOMContentLoaded', () => {
     // Форма подписки
     const form = document.querySelector('.subscribe-form');
     if (form) {
-        form.addEventListener('submit', (e) => {
+        form.addEventListener('submit', async (e) => {
             e.preventDefault();
-            const email = form.querySelector('input')?.value.trim();
+            const email = form.querySelector('input[name="email"]')?.value.trim();
             const isValid = /\S+@\S+\.\S+/.test(email);
 
             if (!isValid) {
@@ -83,17 +83,32 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
 
-            alert('Спасибо за подписку!');
-            form.reset();
-        });
-    }
+            try {
+                const formData = new FormData(form);
+                // JotForm expects the email field name to match the form's field ID (e.g., q1_email)
+                // Adjust the field name if necessary based on JotForm configuration
+                formData.set('email', email); // Ensure the field name matches JotForm's expectation
 
-    // Кнопка "Обсудить сотрудничество"
-    const ctaButton = document.querySelector('#sponsorship .cta-button');
-    if (ctaButton) {
-        ctaButton.addEventListener('click', (e) => {
-            e.preventDefault();
-            window.location.href = 'mailto:worknova@yandex.ru?subject=Сотрудничество с Parry it';
+                const response = await fetch(form.action, {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'Accept': 'application/json'
+                    }
+                });
+
+                if (response.ok) {
+                    alert('Спасибо за подписку! Ваша почта успешно отправлена.');
+                    form.reset();
+                } else {
+                    const errorText = await response.text();
+                    console.error('JotForm error:', errorText);
+                    alert('Произошла ошибка при отправке. Пожалуйста, попробуйте позже.');
+                }
+            } catch (error) {
+                console.error('Error submitting form:', error);
+                alert('Произошла ошибка при отправке. Пожалуйста, попробуйте позже.');
+            }
         });
     }
 

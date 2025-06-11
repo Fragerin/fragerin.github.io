@@ -1,0 +1,616 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Endless Lane Runner</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            font-family: Arial, sans-serif;
+            background: linear-gradient(to bottom, #87CEEB, #1E90FF);
+        }
+        #gameCanvas {
+            display: block;
+            background-color: #333;
+        }
+        #scorePanel {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            color: white;
+            font-size: 24px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+        #startScreen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: white;
+        }
+        #startButton {
+            padding: 15px 30px;
+            font-size: 24px;
+            background: #FFA500;
+            border: none;
+            border-radius: 10px;
+            color: white;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+        #startButton:hover {
+            background: #FF8C00;
+        }
+        .instructions {
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 18px;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="gameCanvas"></canvas>
+    <div id="scorePanel">
+        Score: <span id="score">0</span> | 
+        Coins: <span id="coins">0</span> | 
+        Speed: <span id="speed">1</span>x
+    </div>
+    <div id="startScreen">
+        <h1>Endless Lane Runner</h1>
+        <div class="instructions">
+            <p>Use <strong>Arrow Keys</strong> or <strong>A/D</strong> to switch lanes</p>
+            <p>Avoid obstacles and collect coins & boosts!</p>
+        </div>
+        button id="startButton">Start Game</button>
+    </div>
+
+    <script>
+        // Game setup
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const scoreElement = document.getElementById('score');
+        const coinsElement = document.getElementById('coins');
+        const speedElement = document.getElementById('speed');
+        const startScreen = document.getElementById('startScreen');
+        const startButton = document.getElementById('startButton');
+
+        // Set canvas size
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        // Game variables
+        let score = 0;
+        let coins = 0;
+        let gameSpeed = 1;
+        let gameRunning = false;
+        let animationId;
+        let lastTime = 0;
+        let laneWidth = canvas.width / 5;
+        let playerLane = 2; // Center lane (0-4)
+        let playerX = laneWidth * playerLane + laneWidth / 2;
+        let playerY = canvas.height - 100;
+        let playerWidth = 50;
+        let playerHeight = 80;
+        let obstacles = [];
+        let coinsArray = [];
+        let boostsArray = [];
+        let roadMarkers = [];
+        let backgroundOffset = 0;
+        let laneChangeProgress = 0;
+        let targetLane = playerLane;
+        let invincible = false;
+        let invincibleTimer = 0;
+
+        // Colors
+        const roadColor = '#333333';
+        const laneMarkerColor = '#FFFFFF';
+        const playerColor = '#FF4500';
+        const obstacleColor = '#8B0000';
+        const coinColor = '#FFD700';
+        const boostColor = '#00FF00';
+        const skyColor = '#87CEEB';
+
+        // Initialize road markers
+        for (let i = 0; i < 20; i++) {
+            roadMarkers.push({
+                y: i * 100 - 50,
+                width: 20,
+                height: 30,
+                speed: 5
+            });
+        }
+
+        // Player car image (simple 3D perspective)
+        function drawPlayerCar(x, y, width, height) {
+            // Car body
+            ctx.fillStyle = playerColor;
+            ctx.beginPath();
+            ctx.moveTo(x - width/3, y);
+            ctx.lineTo(x - width/2, y - height/3);
+            ctx.lineTo(x - width/2, y - height);
+            ctx.lineTo(x + width/2, y - height);
+            ctx.lineTo(x + width/2, y - height/3);
+            ctx.lineTo(x + width/3, y);
+            ctx.closePath();
+            ctx.fill();
+            
+            // Windows
+            ctx.fillStyle = '#ADD8E6';
+            ctx.beginPath();
+            ctx.moveTo(x - width/3, y - height/3);
+            ctx.lineTo(x - width/3 + 10, y - height/3 + 10);
+            ctx.lineTo(x - width/3 + 10, y - height*2/3);
+            ctx.lineTo(x - width/3, y - height*2/3 + 10);
+            ctx.closePath();
+            ctx.fill();
+            
+            ctx.beginPath();
+            ctx.moveTo(x + width/3, y - height/3);
+            ctx.lineTo(x + width/3 - 10, y - height/3 + 10);
+            ctx.lineTo(x + width/3 - 10, y - height*2/3);
+            ctx.lineTo(x + width/3, y - height*2/3 + 10);
+            ctx.closePath();
+            ctx.fill();
+            
+            // Wheels
+            ctx.fillStyle = '#000000';
+            ctx.beginPath();
+            ctx.arc(x - width/3, y - height/6, height/8, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.beginPath();
+            ctx.arc(x + width/3, y - height/6, height/8, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // If invincible, add glow effect
+            if (invincible) {
+                ctx.strokeStyle = '#FFFF00';
+                ctx.lineWidth = 3;
+                ctx.beginPath();
+                ctx.arc(x, y - height/2, width/2 + 5, 0, Math.PI * 2);
+                ctx.stroke();
+            }
+        }
+
+        // Obstacle (simple 3D box)
+        function drawObstacle(x, y, width, height) {
+            // Front face
+            ctx.fillStyle = obstacleColor;
+            ctx.beginPath();
+            ctx.moveTo(x - width/2, y);
+            ctx.lineTo(x - width/2, y - height);
+            ctx.lineTo(x + width/2, y - height);
+            ctx.lineTo(x + width/2, y);
+            ctx.closePath();
+            ctx.fill();
+            
+            // Top face
+            ctx.fillStyle = '#A52A2A';
+            ctx.beginPath();
+            ctx.moveTo(x - width/2, y - height);
+            ctx.lineTo(x - width/3, y - height*1.2);
+            ctx.lineTo(x + width/3, y - height*1.2);
+            ctx.lineTo(x + width/2, y - height);
+            ctx.closePath();
+            ctx.fill();
+            
+            // Side face
+            ctx.fillStyle = '#800000';
+            ctx.beginPath();
+            ctx.moveTo(x + width/2, y - height);
+            ctx.lineTo(x + width/3, y - height*1.2);
+            ctx.lineTo(x + width/3, y - height*0.2);
+            ctx.lineTo(x + width/2, y);
+            ctx.closePath();
+            ctx.fill();
+        }
+
+        // Coin (shiny circle)
+        function drawCoin(x, y, radius) {
+            // Gold circle
+            const gradient = ctx.createRadialGradient(x, y, radius/4, x, y, radius);
+            gradient.addColorStop(0, '#FFFF00');
+            gradient.addColorStop(1, '#FFD700');
+            ctx.fillStyle = gradient;
+            ctx.beginPath();
+            ctx.arc(x, y, radius, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Shine effect
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
+            ctx.beginPath();
+            ctx.arc(x - radius/3, y - radius/3, radius/4, 0, Math.PI * 2);
+            ctx.fill();
+        }
+
+        // Boost item (lightning bolt)
+        function drawBoost(x, y, size) {
+            ctx.fillStyle = boostColor;
+            ctx.beginPath();
+            ctx.moveTo(x, y - size/2);
+            ctx.lineTo(x + size/3, y);
+            ctx.lineTo(x - size/3, y + size/2);
+            ctx.lineTo(x, y + size/4);
+            ctx.lineTo(x + size/2, y + size);
+            ctx.lineTo(x + size/6, y + size/2);
+            ctx.lineTo(x + size, y + size/2);
+            ctx.lineTo(x, y - size/2);
+            ctx.closePath();
+            ctx.fill();
+        }
+
+        // Draw road with perspective
+        function drawRoad() {
+            // Sky
+            ctx.fillStyle = skyColor;
+            ctx.fillRect(0, 0, canvas.width, canvas.height/3);
+            
+            // Road with perspective
+            const gradient = ctx.createLinearGradient(0, canvas.height/3, 0, canvas.height);
+            gradient.addColorStop(0, '#555555');
+            gradient.addColorStop(1, '#222222');
+            ctx.fillStyle = gradient;
+            ctx.beginPath();
+            ctx.moveTo(0, canvas.height/3);
+            ctx.lineTo(canvas.width, canvas.height/3);
+            ctx.lineTo(canvas.width * 0.6, canvas.height);
+            ctx.lineTo(canvas.width * 0.4, canvas.height);
+            ctx.closePath();
+            ctx.fill();
+            
+            // Lane markers with perspective
+            ctx.fillStyle = laneMarkerColor;
+            for (let i = 0; i < 5; i++) {
+                const laneStart = i * laneWidth;
+                const laneEnd = (i + 1) * laneWidth;
+                
+                ctx.beginPath();
+                ctx.moveTo(laneStart, canvas.height/3);
+                ctx.lineTo(laneStart + (canvas.width * 0.6 - canvas.width) / (canvas.height - canvas.height/3) * (canvas.height - canvas.height/3), canvas.height);
+                ctx.lineTo(laneEnd + (canvas.width * 0.4 - canvas.width) / (canvas.height - canvas.height/3) * (canvas.height - canvas.height/3), canvas.height);
+                ctx.lineTo(laneEnd, canvas.height/3);
+                ctx.closePath();
+                ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
+                ctx.lineWidth = 2;
+                ctx.stroke();
+            }
+            
+            // Road markers (dashed lines in the middle of lanes)
+            for (let marker of roadMarkers) {
+                for (let i = 0; i < 4; i++) {
+                    const laneCenter = (i + 0.5) * laneWidth;
+                    const perspectiveFactor = 1 + (marker.y / canvas.height) * 0.5;
+                    
+                    ctx.fillStyle = laneMarkerColor;
+                    ctx.fillRect(
+                        laneCenter - marker.width/2 * perspectiveFactor,
+                        marker.y,
+                        marker.width * perspectiveFactor,
+                        marker.height * perspectiveFactor
+                    );
+                }
+            }
+        }
+
+        // Handle keyboard input
+        function handleKeyDown(e) {
+            if (!gameRunning) return;
+            
+            if ((e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') && targetLane > 0 && laneChangeProgress === 0) {
+                targetLane--;
+                laneChangeProgress = 0.01;
+            }
+            if ((e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') && targetLane < 4 && laneChangeProgress === 0) {
+                targetLane++;
+                laneChangeProgress = 0.01;
+            }
+        }
+
+        // Spawn obstacles, coins, and boosts
+        function spawnObjects() {
+            // Random chance to spawn obstacle
+            if (Math.random() < 0.02) {
+                const lane = Math.floor(Math.random() * 5);
+                obstacles.push({
+                    x: lane * laneWidth + laneWidth / 2,
+                    y: -50,
+                    width: 40 + Math.random() * 20,
+                    height: 50 + Math.random() * 30,
+                    lane: lane
+                });
+            }
+            
+            // Random chance to spawn coin
+            if (Math.random() < 0.05) {
+                const lane = Math.floor(Math.random() * 5);
+                coinsArray.push({
+                    x: lane * laneWidth + laneWidth / 2,
+                    y: -20,
+                    radius: 15,
+                    lane: lane
+                });
+            }
+            
+            // Random chance to spawn boost
+            if (Math.random() < 0.01) {
+                const lane = Math.floor(Math.random() * 5);
+                boostsArray.push({
+                    x: lane * laneWidth + laneWidth / 2,
+                    y: -30,
+                    size: 25,
+                    lane: lane
+                });
+            }
+        }
+
+        // Check collisions
+        function checkCollisions() {
+            if (invincible) return false;
+            
+            const playerRect = {
+                x: playerX - playerWidth/2,
+                y: playerY - playerHeight,
+                width: playerWidth,
+                height: playerHeight
+            };
+            
+            // Check obstacle collisions
+            for (let i = 0; i < obstacles.length; i++) {
+                const obstacle = obstacles[i];
+                const obstacleRect = {
+                    x: obstacle.x - obstacle.width/2,
+                    y: obstacle.y - obstacle.height,
+                    width: obstacle.width,
+                    height: obstacle.height
+                };
+                
+                if (rectIntersect(playerRect, obstacleRect)) {
+                    return true;
+                }
+            }
+            
+            return false;
+        }
+        
+        // Check coin collection
+        function checkCoinCollection() {
+            const playerRect = {
+                x: playerX - playerWidth/2,
+                y: playerY - playerHeight,
+                width: playerWidth,
+                height: playerHeight
+            };
+            
+            for (let i = coinsArray.length - 1; i >= 0; i--) {
+                const coin = coinsArray[i];
+                const coinRect = {
+                    x: coin.x - coin.radius,
+                    y: coin.y - coin.radius,
+                    width: coin.radius * 2,
+                    height: coin.radius * 2
+                };
+                
+                if (rectIntersect(playerRect, coinRect)) {
+                    coins++;
+                    coinsArray.splice(i, 1);
+                    coinsElement.textContent = coins;
+                    score += 10;
+                    scoreElement.textContent = score;
+                }
+            }
+        }
+        
+        // Check boost collection
+        function checkBoostCollection() {
+            const playerRect = {
+                x: playerX - playerWidth/2,
+                y: playerY - playerHeight,
+                width: playerWidth,
+                height: playerHeight
+            };
+            
+            for (let i = boostsArray.length - 1; i >= 0; i--) {
+                const boost = boostsArray[i];
+                const boostRect = {
+                    x: boost.x - boost.size/2,
+                    y: boost.y - boost.size/2,
+                    width: boost.size,
+                    height: boost.size
+                };
+                
+                if (rectIntersect(playerRect, boostRect)) {
+                    boostsArray.splice(i, 1);
+                    invincible = true;
+                    invincibleTimer = 180; // 3 seconds at 60fps
+                    gameSpeed = 2; // Speed boost
+                    speedElement.textContent = gameSpeed;
+                }
+            }
+        }
+        
+        // Rectangle intersection helper
+        function rectIntersect(rect1, rect2) {
+            return rect1.x < rect2.x + rect2.width &&
+                   rect1.x + rect1.width > rect2.x &&
+                   rect1.y < rect2.y + rect2.height &&
+                   rect1.y + rect1.height > rect2.y;
+        }
+
+        // Update game state
+        function update(deltaTime) {
+            // Update player lane position with easing
+            if (laneChangeProgress > 0) {
+                laneChangeProgress += 0.1;
+                if (laneChangeProgress >= 1) {
+                    laneChangeProgress = 0;
+                    playerLane = targetLane;
+                }
+                
+                const easedProgress = easeOutQuad(laneChangeProgress);
+                playerX = (playerLane * laneWidth + laneWidth / 2) + 
+                          (targetLane - playerLane) * laneWidth * easedProgress;
+            }
+            
+            // Update road markers
+            for (let marker of roadMarkers) {
+                marker.y += marker.speed * gameSpeed;
+                if (marker.y > canvas.height) {
+                    marker.y = -50;
+                }
+            }
+            
+            // Update obstacles
+            for (let i = obstacles.length - 1; i >= 0; i--) {
+                obstacles[i].y += 5 * gameSpeed;
+                if (obstacles[i].y > canvas.height + 100) {
+                    obstacles.splice(i, 1);
+                    score += 5;
+                    scoreElement.textContent = score;
+                }
+            }
+            
+            // Update coins
+            for (let i = coinsArray.length - 1; i >= 0; i--) {
+                coinsArray[i].y += 5 * gameSpeed;
+                if (coinsArray[i].y > canvas.height + 100) {
+                    coinsArray.splice(i, 1);
+                }
+            }
+            
+            // Update boosts
+            for (let i = boostsArray.length - 1; i >= 0; i--) {
+                boostsArray[i].y += 5 * gameSpeed;
+                if (boostsArray[i].y > canvas.height + 100) {
+                    boostsArray.splice(i, 1);
+                }
+            }
+            
+            // Spawn new objects
+            spawnObjects();
+            
+            // Check collisions and collections
+            checkCoinCollection();
+            checkBoostCollection();
+            
+            if (checkCollisions()) {
+                endGame();
+            }
+            
+            // Update invincibility timer
+            if (invincible) {
+                invincibleTimer--;
+                if (invincibleTimer <= 0) {
+                    invincible = false;
+                    gameSpeed = 1;
+                    speedElement.textContent = gameSpeed;
+                }
+            }
+            
+            // Gradually increase difficulty
+            if (score > 0 && score % 500 === 0) {
+                gameSpeed = Math.min(3, 1 + Math.floor(score / 500) * 0.2);
+                speedElement.textContent = gameSpeed.toFixed(1);
+            }
+        }
+
+        // Easing function for smooth lane changes
+        function easeOutQuad(t) {
+            return t * (2 - t);
+        }
+
+        // Main game loop
+        function gameLoop(timestamp) {
+            if (!lastTime) lastTime = timestamp;
+            const deltaTime = timestamp - lastTime;
+            lastTime = timestamp;
+            
+            if (gameRunning) {
+                update(deltaTime);
+            }
+            
+            // Clear canvas
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // Draw game elements
+            drawRoad();
+            
+            // Draw coins
+            for (let coin of coinsArray) {
+                drawCoin(coin.x, coin.y, coin.radius);
+            }
+            
+            // Draw boosts
+            for (let boost of boostsArray) {
+                drawBoost(boost.x, boost.y, boost.size);
+            }
+            
+            // Draw obstacles
+            for (let obstacle of obstacles) {
+                drawObstacle(obstacle.x, obstacle.y, obstacle.width, obstacle.height);
+            }
+            
+            // Draw player
+            drawPlayerCar(playerX, playerY, playerWidth, playerHeight);
+            
+            animationId = requestAnimationFrame(gameLoop);
+        }
+
+        // Start game
+        function startGame() {
+            score = 0;
+            coins = 0;
+            gameSpeed = 1;
+            playerLane = 2;
+            targetLane = 2;
+            playerX = laneWidth * playerLane + laneWidth / 2;
+            obstacles = [];
+            coinsArray = [];
+            boostsArray = [];
+            invincible = false;
+            
+            scoreElement.textContent = score;
+            coinsElement.textContent = coins;
+            speedElement.textContent = gameSpeed;
+            
+            startScreen.style.display = 'none';
+            gameRunning = true;
+            lastTime = 0;
+            
+            if (!animationId) {
+                animationId = requestAnimationFrame(gameLoop);
+            }
+        }
+
+        // End game
+        function endGame() {
+            gameRunning = false;
+            startScreen.style.display = 'flex';
+            document.querySelector('.instructions').innerHTML = `
+                <p>Game Over!</p>
+                <p>Final Score: ${score}</p>
+                <p>Coins Collected: ${coins}</p>
+                <p>Press Start to play again</p>
+            `;
+        }
+
+        // Event listeners
+        window.addEventListener('keydown', handleKeyDown);
+        startButton.addEventListener('click', startGame);
+        window.addEventListener('resize', () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            laneWidth = canvas.width / 5;
+            playerY = canvas.height - 100;
+            playerX = laneWidth * playerLane + laneWidth / 2;
+        });
+
+        // Initialize
+        drawRoad();
+    </script>
+</body>
+</html>
