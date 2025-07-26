@@ -3,14 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Parry it</title>
+    <title>Parry it - Системно-Нарративный Симулятор</title>
     <link rel="stylesheet" href="https://unpkg.com/swiper/swiper-bundle.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="style.css">
     <link rel="icon" href="ico/favicon.ico" type="image/x-icon">
     <link rel="apple-touch-icon" sizes="180x180" href="ico/apple-touch-icon.png">
     <link rel="icon" type="image/png" sizes="32x32" href="ico/favicon-32x32.png">
     <link rel="icon" type="image/png" sizes="16x16" href="ico/favicon-16x16.png">
+
 </head>
 <body>
     <header>
@@ -26,6 +28,8 @@
             <ul>
                 <li><a href="#hero">О игре</a></li>
                 <li><a href="#mechanics">Механики</a></li>
+                <li><a href="#architecture">Архитектура СНС</a></li>
+                <li><a href="#tech">Технологии</a></li>
                 <li><a href="#sponsorship">Поддержать</a></li>
                 <li><a href="#cta">Новости</a></li>
             </ul>
@@ -38,7 +42,7 @@
             <div class="swiper hero-swiper">
                 <div class="swiper-wrapper">
                     <div class="swiper-slide">
-                        <img src="img/342.jpg" alt="Совещание в президентском дворце" >
+                        <img src="img/342.jpg" alt="Совещание в президентском дворце">
                     </div>
                     <div class="swiper-slide">
                         <img src="img/1.jpg" alt="Городской пейзаж Остравы">
@@ -61,7 +65,9 @@
             <div class="hero-content">
                 <h1>Parry it</h1>
                 <p>Формируй судьбу Оставы своими решениями</p>
-                <a href="https://vk.com/parryit" target="_blank" class="cta-button">Присоединиться к сообществу</a>
+                <div class="hero-buttons">
+                    <a href="https://vk.com/parryit" target="_blank" class="cta-button">Присоединиться к сообществу</a>
+                </div>
             </div>
         </section>
 
@@ -87,7 +93,7 @@
                         </div>
                         <div class="swiper-slide">
                             <div class="mechanic-card animate">
-                                <img src="img/33.png" alt="Экономическая система">
+                                <img src="img/3.png" alt="Экономическая система">
                                 <h3>Глубокий проработанный мир</h3>
                                 <p>Сотни персонажей, десятки локаций... весь мир уникальный</p>
                             </div>
@@ -122,6 +128,176 @@
             </div>
         </section>
 
+    <section id="architecture">
+    <div class="container">
+        <h2 class="animate">Архитектура СНС</h2>
+        <p class="subtitle animate">Системно-Нарративный Симулятор — сердце игрового мира</p>
+
+        <div class="architecture-container">
+            <!-- Основные компоненты -->
+            <div class="architecture-core">
+                <div class="core-diagram">
+                    <div class="architecture-node" id="core-node">
+                        <i class="fas fa-brain"></i>
+                        <h3>Центральное Ядро</h3>
+                        <p>Координирует работу всех систем и обрабатывает решения игрока</p>
+                    </div>
+
+                    <div class="core-modules">
+                        <div class="module active" data-module="economy">
+                            <div class="module-icon"><i class="fas fa-coins"></i></div>
+                            <h4>Экономика</h4>
+                        </div>
+                        <div class="module" data-module="politics">
+                            <div class="module-icon"><i class="fas fa-landmark"></i></div>
+                            <h4>Политика</h4>
+                        </div>
+                        <div class="module" data-module="society">
+                            <div class="module-icon"><i class="fas fa-users"></i></div>
+                            <h4>Социум</h4>
+                        </div>
+                        <div class="module" data-module="information">
+                            <div class="module-icon"><i class="fas fa-newspaper"></i></div>
+                            <h4>Информация</h4>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Перенесенный блок с деталями модуля -->
+                <div class="module-details animate" id="module-details">
+                    <div class="module-header">
+                        <div class="module-icon" id="detail-icon"><i class="fas fa-coins"></i></div>
+                        <h3 id="detail-title">Экономика</h3>
+                    </div>
+                    <p id="detail-description">Управляет ресурсами, ценами, инфляцией и торговлей. Влияет на доступность товаров и уровень жизни</p>
+
+                    <div class="module-effects">
+                        <h4>Эффекты решений:</h4>
+                        <ul id="effect-list">
+                            <li>Повышение налогов → Рост цен +20%</li>
+                            <li>Снижение пошлин → Импорт товаров +30%</li>
+                            <li>Инвестиции в производство → Безработица -15%</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Особенности СНС (теперь ниже) -->
+            <div class="core-features">
+                <div class="feature">
+                    <div class="feature-icon"><i class="fas fa-code-branch"></i></div>
+                    <h3>Эмерджентный нарратив</h3>
+                    <p>Уникальные сюжетные линии на основе ваших решений</p>
+                </div>
+                <div class="feature">
+                    <div class="feature-icon"><i class="fas fa-project-diagram"></i></div>
+                    <h3>Модульная архитектура</h3>
+                    <p>Независимые, но связанные модули</p>
+                </div>
+                <div class="feature">
+                    <div class="feature-icon"><i class="fas fa-memory"></i></div>
+                    <h3>Память мира</h3>
+                    <p>Запоминает каждое ваше решение</p>
+                </div>
+            </div>
+
+            <!-- Процесс принятия решений (упрощенный) -->
+            <div class="decision-process">
+                <h3>Как работает система:</h3>
+                <div class="process-flow">
+                    <div class="process-step">
+                        <div class="step-number">1</div>
+                        <h4>Игрок принимает решение</h4>
+                        <div class="step-example">
+                            <i class="fas fa-lightbulb"></i> Президент повышает налоги
+                        </div>
+                    </div>
+
+                    <div class="process-arrow">
+                        <i class="fas fa-arrow-right"></i>
+                    </div>
+
+                    <div class="process-step">
+                        <div class="step-number">2</div>
+                        <h4>Ядро анализирует выбор</h4>
+                        <div class="step-example">
+                            <i class="fas fa-brain"></i> Влияние на экономику и социум
+                        </div>
+                    </div>
+
+                    <div class="process-arrow">
+                        <i class="fas fa-arrow-right"></i>
+                    </div>
+
+                    <div class="process-step">
+                        <div class="step-number">3</div>
+                        <h4>Модули обновляют мир</h4>
+                        <div class="step-example">
+                            <i class="fas fa-sync-alt"></i> Цены +20%, Недовольство +30%
+                        </div>
+                    </div>
+
+                    <div class="process-arrow">
+                        <i class="fas fa-arrow-right"></i>
+                    </div>
+
+                    <div class="process-step">
+                        <div class="step-number">4</div>
+                        <h4>Игрок видит последствия</h4>
+                        <div class="step-example">
+                            <i class="fas fa-user-injured"></i> Врач: пациенты не могут купить лекарства
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+        <!-- Секция технологий -->
+        <section id="tech">
+            <div class="container">
+                <h2 class="animate">Технологии</h2>
+                <p class="subtitle animate">Передовые решения для глубокого погружения</p>
+
+                <div class="tech-stack">
+                    <div class="tech-card animate">
+                        <div class="tech-icon"><i class="fas fa-gamepad"></i></div>
+                        <h3>Godot Engine</h3>
+                        <p>Мощный открытый движок для реализации сложной логики и визуализации</p>
+                        <ul>
+                            <li>Поддержка 2.5D с параллаксом</li>
+                            <li>Гибкая система анимации</li>
+                            <li>Оптимизация для динамических миров</li>
+                        </ul>
+                    </div>
+
+                    <div class="tech-card animate">
+                        <div class="tech-icon"><i class="fas fa-comment-alt"></i></div>
+                        <h3>Ink Narrative Engine</h3>
+                        <p>Продвинутая система диалогов и ветвления сюжета</p>
+                        <ul>
+                            <li>Нелинейные диалоговые деревья</li>
+                            <li>Динамическая генерация реплик</li>
+                            <li>Интеграция с игровыми системами</li>
+                        </ul>
+                    </div>
+
+                    <div class="tech-card animate">
+                        <div class="tech-icon"><i class="fas fa-cogs"></i></div>
+                        <h3>Модульный СНС</h3>
+                        <p>Кастомная архитектура системно-нарративного симулятора</p>
+                        <ul>
+                            <li>Изолированные модули систем</li>
+                            <li>API взаимодействия между системами</li>
+                            <li>Масштабируемая архитектура</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
         <section id="sponsorship">
             <div class="container">
                 <div class="sponsor-card animate">
@@ -149,7 +325,9 @@
                             </div>
                         </div>
                     </div>
+                    <div class =" hero-buttons">
                     <a href="https://vk.com/parryit" target="_blank" class="cta-button">Начать сотрудничество</a>
+                        </div>
                 </div>
             </div>
         </section>
@@ -163,16 +341,29 @@
                         <button type="submit">Подписаться</button>
                     </div>
                 </form>
+                <div class="social-links">
+                    <a href="https://vk.com/parryit" target="_blank" class="social-icon"><i class="fab fa-vk"></i></a>
+                    <a href="#" class="social-icon"><i class="fab fa-telegram"></i></a>
+                    <a href="#" class="social-icon"><i class="fab fa-youtube"></i></a>
+                    <a href="#" class="social-icon"><i class="fab fa-discord"></i></a>
+                </div>
             </div>
         </section>
     </main>
 
     <footer>
-        <p>© 2025 Parry it. Все права защищены.</p>
-        <p>Контакт: <a href="mailto:worknova@yandex.ru">worknova@yandex.ru</a></p>
+        <div class="footer-content">
+            <div class="footer-links">
+                <a href="mailto:worknova@yandex.ru">worknova@yandex.ru</a>
+                <a href="#">Политика конфиденциальности</a>
+                <a href="#">Условия использования</a>
+            </div>
+            <p>© 2025 Parry it. Все права защищены.</p>
+        </div>
     </footer>
 
     <script src="https://unpkg.com/swiper/swiper-bundle.min.js"></script>
     <script src="script.js"></script>
+
 </body>
 </html>
